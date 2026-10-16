@@ -1,10 +1,13 @@
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { Moon, Sunny } from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth.js'
 
 // 主题双向绑定
 const theme = defineModel('theme')
 
+const router = useRouter()
 const authStore = useAuthStore()
 
 // 当前激活的导航项（父组件传入，用于高亮）
@@ -27,25 +30,35 @@ const navItems = computed(() => {
   items.push(authStore.isLoggedIn ? { id: 'admin', label: '后台管理' } : { id: 'login', label: '登录' })
   return items
 })
+
+// el-menu 未开启 router 模式：@select 拿到 index（即导航 id），用命名路由跳转
+function onSelect(index) {
+  router.push({ name: index })
+}
 function toggleTheme() {
   theme.value = theme.value === 'light' ? 'dark' : 'light'
 }
 </script>
 
 <template>
-  <!-- 顶部导航栏：点击切换左侧板块 + 主题切换 -->
   <nav class="navbar">
     <div class="brand">个人<span>主页</span></div>
-    <div class="nav-links">
-      <!-- RouterLink 声明式导航：用命名路由生成链接，渲染成 <a>，无需手动拦截点击 -->
-      <RouterLink
-        v-for="item in navItems"
-        :key="item.id"
-        :to="{ name: item.id }"
-        :class="{ active: props.activeTab === item.id }"
-      >{{ item.label }}</RouterLink>
-    </div>
-    <button @click="toggleTheme">{{ theme === 'light' ? '🌙 暗色' : '☀️ 亮色' }}</button>
+
+    <!-- el-menu（horizontal 模式）：顶部导航菜单；:ellipsis="false" 禁止折叠成「更多」 -->
+    <el-menu
+      class="nav-menu"
+      mode="horizontal"
+      :default-active="props.activeTab"
+      :ellipsis="false"
+      @select="onSelect"
+    >
+      <el-menu-item v-for="item in navItems" :key="item.id" :index="item.id">{{ item.label }}</el-menu-item>
+    </el-menu>
+
+    <!-- el-button：主题切换按钮，:icon 绑定 Element Plus 图标组件 -->
+    <el-button round :icon="theme === 'light' ? Moon : Sunny" @click="toggleTheme">
+      {{ theme === 'light' ? '暗色' : '亮色' }}
+    </el-button>
   </nav>
 </template>
 
@@ -54,7 +67,7 @@ function toggleTheme() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 24px;
+  padding: 8px 24px;
   background: var(--bar-bg);
   border-bottom: 1px solid var(--border);
   position: sticky;
@@ -65,40 +78,26 @@ function toggleTheme() {
 .navbar .brand { font-weight: 700; font-size: 18px; white-space: nowrap; }
 .navbar .brand span { color: var(--accent); }
 
-.nav-links {
-  display: flex;
-  gap: 18px;
+.nav-menu {
   flex: 1;
+  border-bottom: none;
+  background: transparent;
   justify-content: center;
+  --el-menu-horizontal-height: 46px;
+  --el-menu-text-color: var(--text);
+  --el-menu-active-color: var(--accent);
+  --el-menu-hover-text-color: var(--accent);
+  --el-menu-hover-bg-color: transparent;
 }
-.nav-links a {
-  color: var(--text);
-  text-decoration: none;
+.nav-menu :deep(.el-menu-item) {
   font-size: 14px;
-  padding: 6px 4px;
   border-bottom: 2px solid transparent;
-  transition: color .2s, border-color .2s;
-  white-space: nowrap;
 }
-.nav-links a:hover,
-.nav-links a.active {
-  color: var(--accent);
+.nav-menu :deep(.el-menu-item.is-active) {
   border-bottom-color: var(--accent);
 }
 
-.navbar button {
-  background: var(--chip);
-  color: var(--chip-text);
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  white-space: nowrap;
-}
-.navbar button:hover { opacity: .85; }
-
 @media (max-width: 560px) {
-  .nav-links { display: none; }
+  .nav-menu { display: none; }
 }
 </style>
