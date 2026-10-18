@@ -32,6 +32,11 @@ jobs:
       - name: Build project
         run: npm run build
 
+      # SPA 后备页：GitHub Pages 无服务器路由，刷新子页面时返回 404.html，
+      # 其内容与 index.html 相同，由前端路由接管渲染，避免刷新 404
+      - name: Create SPA fallback
+        run: cp dist/index.html dist/404.html
+
       - name: Upload build artifacts
         uses: actions/upload-pages-artifact@v3
         with:
