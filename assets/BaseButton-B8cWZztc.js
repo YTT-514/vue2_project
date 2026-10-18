@@ -1,1 +1,0 @@
-import{Kt as e,V as t,W as n,_ as r,t as i}from"./_plugin-vue_export-helper-BsK8gsDe.js";var a=i({__name:`BaseButton`,props:{variant:{type:String,default:`primary`}},setup(i){return(a,o)=>(t(),r(`button`,{class:e([`base-btn`,i.variant]),type:`button`},[n(a.$slots,`default`,{},void 0,!0)],2))}},[[`__scopeId`,`data-v-9c194051`]]);export{a as t};
